@@ -1,7 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-const TOTAL_TABLES = 10; // pretend the restaurant has 10 tables
+const TOTAL_TABLES = 10;
 
 export const checkAvailability = query({
   args: { date: v.string(), time: v.string(), party_size: v.number() },
@@ -12,7 +12,6 @@ export const checkAvailability = query({
         q.eq("date", args.date).eq("time", args.time)
       )
       .collect();
-
     const available = booked.length < TOTAL_TABLES;
     return {
       available,
@@ -37,11 +36,9 @@ export const createReservation = mutation({
         q.eq("date", args.date).eq("time", args.time)
       )
       .collect();
-
     if (booked.length >= TOTAL_TABLES) {
       return { confirmed: false, reason: "fully booked" };
     }
-
     const id = await ctx.db.insert("reservations", {
       ...args,
       table_id: booked.length + 1,
