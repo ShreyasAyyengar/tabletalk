@@ -25,12 +25,6 @@ import type { DataModel } from "./dataModel.js";
  * Typesafe environment variables declared in `convex.config.ts`.
  */
 type Env = {
-  readonly AUTH_BASE_PATH: string;
-  readonly BETTER_AUTH_SECRET: string;
-  readonly CALENDAR_CREDENTIALS_KEY_HEX: string;
-  readonly GOOGLE_CALENDAR_REDIRECT_URI: string;
-  readonly GOOGLE_CLIENT_ID: string;
-  readonly GOOGLE_CLIENT_SECRET: string;
   readonly WEBSITE_URL: string;
 };
 
