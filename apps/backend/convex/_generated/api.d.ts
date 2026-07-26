@@ -13,6 +13,7 @@ import type * as danger from "../danger.js";
 import type * as http from "../http.js";
 import type * as lib_gemma from "../lib/gemma.js";
 import type * as lib_procedures from "../lib/procedures.js";
+import type * as reservation_schemas from "../reservation/schemas.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "lib/gemma": typeof lib_gemma;
   "lib/procedures": typeof lib_procedures;
+  "reservation/schemas": typeof reservation_schemas;
 }>;
 
 /**
