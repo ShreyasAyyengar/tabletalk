@@ -3,22 +3,18 @@ import { useEffect, useState } from "react";
 
 import { useMediaRecorder } from "#/hooks/use-media-recorder";
 
-type VoiceRecorderProps = {
-  onRecordingComplete?: (blob: Blob) => void;
-};
-
-export function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProps) {
+export function VoiceRecorder({ onRecordingComplete, compact }: { onRecordingComplete?: (blob: Blob, durationMs: number) => void; compact?: boolean }) {
   const { status, start, stop, audioBlob, durationMs, error } = useMediaRecorder();
   const [showCheck, setShowCheck] = useState(false);
 
   useEffect(() => {
     if (status === "stopped" && audioBlob) {
-      onRecordingComplete?.(audioBlob);
+      onRecordingComplete?.(audioBlob, durationMs);
       setShowCheck(true);
       const timer = setTimeout(() => setShowCheck(false), 1500);
       return () => clearTimeout(timer);
     }
-  }, [status, audioBlob, onRecordingComplete]);
+  }, [status, audioBlob, onRecordingComplete, durationMs]);
 
   const isRecording = status === "recording";
   const isRequesting = status === "requesting";
@@ -53,12 +49,14 @@ export function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProps) {
     }
   };
 
+  const iconSize = compact ? "size-4" : "size-6";
+
   const icon = (() => {
-    if (isRequesting) return <Loader2 className="size-6 animate-spin" />;
-    if (isRecording) return <Square className="size-5" fill="currentColor" />;
-    if (status === "error") return <MicOff className="size-6" />;
-    if (showCheck) return <Check className="size-6" />;
-    return <Mic className="size-6" />;
+    if (isRequesting) return <Loader2 className={`${iconSize} animate-spin`} />;
+    if (isRecording) return <Square className={compact ? "size-3.5" : "size-5"} fill="currentColor" />;
+    if (status === "error") return <MicOff className={iconSize} />;
+    if (showCheck) return <Check className={iconSize} />;
+    return <Mic className={iconSize} />;
   })();
 
   const buttonStyle = (() => {
@@ -75,12 +73,12 @@ export function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProps) {
   })();
 
   return (
-    <div className="flex flex-col items-center gap-5">
+    <div className={`flex flex-col items-center ${compact ? "" : "gap-5"}`}>
       <button
         type="button"
         onClick={handleClick}
         disabled={isRequesting}
-        className={`relative flex size-16 items-center justify-center rounded-full border-2 transition-all duration-200 disabled:cursor-not-allowed ${buttonStyle}`}
+        className={`relative flex ${compact ? "size-10" : "size-16"} items-center justify-center rounded-full border-2 transition-all duration-200 disabled:cursor-not-allowed ${buttonStyle}`}
         aria-label={statusText()}
         title={statusText()}
       >
@@ -88,9 +86,11 @@ export function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProps) {
         {isRecording && <span className="absolute -inset-1 animate-ping rounded-full border-2 border-destructive/40" />}
       </button>
 
-      <p className={`font-medium text-sm tracking-tight ${isRecording || status === "error" ? "text-destructive" : "text-muted-foreground"}`}>
-        {statusText()}
-      </p>
+      {!compact ? (
+        <p className={`font-medium text-sm tracking-tight ${isRecording || status === "error" ? "text-destructive" : "text-muted-foreground"}`}>
+          {statusText()}
+        </p>
+      ) : null}
     </div>
   );
 }

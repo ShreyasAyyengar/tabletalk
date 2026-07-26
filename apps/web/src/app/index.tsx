@@ -1,57 +1,56 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMutation } from "convex/react";
 import { useCallback, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { v4 as uuidv4 } from "uuid";
 
-import { AudioPlayer } from "#/components/chat/audio-player";
+import { ChatInput } from "#/components/chat/chat-input";
+import { ChatMessages, type ChatMessage } from "#/components/chat/chat-messages";
 import { VoiceRecorder } from "#/components/chat/voice-recorder";
-import { api } from "../../../backend/convex/_generated/api";
+
+const MS_TO_S = 1000;
 
 export const Route = createFileRoute("/")({ component: App });
 
 function App() {
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-  const handleRecordingComplete = useCallback((blob: Blob) => {
-    setAudioBlob(blob);
+  const handleRecordingComplete = useCallback((blob: Blob, durationMs: number) => {
+    const msg: ChatMessage = {
+      id: uuidv4(),
+      role: "user",
+      durationHint: durationMs / MS_TO_S,
+      audioBlob: blob,
+    };
+    setMessages((prev) => [...prev, msg]);
   }, []);
 
-  const handleClear = useCallback(() => {
-    setAudioBlob(null);
+  const handleSend = useCallback((text: string) => {
+    const msg: ChatMessage = {
+      id: uuidv4(),
+      role: "user",
+      text,
+    };
+    setMessages((prev) => [...prev, msg]);
   }, []);
-
-  const generateUploadURL = useMutation(api.audio.process.generateUploadUrl);
-  const sendAudioSegment = useMutation(api.audio.process.receiveAudio);
-
-  const handleSend = useCallback(async () => {
-    if (!audioBlob) return;
-
-    const uploadURL = await generateUploadURL({});
-    const result = await fetch(uploadURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "audio/webm",
-      },
-      body: audioBlob,
-    });
-    const { storageId } = await result.json();
-
-    await sendAudioSegment({
-      audioSegmentStorageId: storageId,
-      customerName: "", // TODO,
-    });
-  }, [audioBlob]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-16 bg-background px-4">
-      <section className="flex flex-col items-center gap-3">
-        <h1 className="font-bold text-4xl text-foreground tracking-tighter">tabletalk</h1>
-        <p className="text-muted-foreground text-sm">Voice-powered reservations</p>
+    <main className="flex min-h-screen flex-col bg-background">
+      <header className="flex shrink-0 flex-col items-center gap-1 border-b px-4 py-4">
+        <h1 className="font-bold text-4xl text-foreground tracking-tighter">
+          tabletalk
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Voice-powered reservations
+        </p>
+      </header>
+
+      <section className="flex min-h-0 flex-1 flex-col">
+        <ChatMessages messages={messages} />
       </section>
 
-      <div className="flex flex-col items-center gap-4">
-        <VoiceRecorder onRecordingComplete={handleRecordingComplete} />
-        <AudioPlayer blob={audioBlob} onClear={handleClear} />
-      </div>
+      <footer className="flex shrink-0 items-center gap-2 border-t p-4">
+        <VoiceRecorder compact onRecordingComplete={handleRecordingComplete} />
+        <ChatInput onSend={handleSend} />
+      </footer>
     </main>
   );
 }

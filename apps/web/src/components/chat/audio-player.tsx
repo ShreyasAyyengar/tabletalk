@@ -6,17 +6,12 @@ import { Slider } from "@tabletalk/shad-ui/components/slider";
 
 const DEFAULT_MAX_DURATION = 100;
 
-type AudioPlayerProps = {
-  blob: Blob | null;
-  onClear?: () => void;
-};
-
-export function AudioPlayer({ blob, onClear }: AudioPlayerProps) {
+export function AudioPlayer({ blob, durationHint, onClear }: { blob: Blob | null; durationHint?: number; onClear?: () => void }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(durationHint ?? 0);
 
   useEffect(() => {
     if (objectUrlRef.current) {
@@ -30,13 +25,16 @@ export function AudioPlayer({ blob, onClear }: AudioPlayerProps) {
       setDuration(0);
       return;
     }
+    setDuration(durationHint ?? 0);
     const url = URL.createObjectURL(blob);
     objectUrlRef.current = url;
     const audio = new Audio(url);
     audioRef.current = audio;
 
     audio.addEventListener("loadedmetadata", () => {
-      setDuration(audio.duration);
+      if (Number.isFinite(audio.duration) && audio.duration > 0) {
+        setDuration(audio.duration);
+      }
     });
     audio.addEventListener("timeupdate", () => {
       setCurrentTime(audio.currentTime);
@@ -50,7 +48,7 @@ export function AudioPlayer({ blob, onClear }: AudioPlayerProps) {
       audio.pause();
       audio.src = "";
     };
-  }, [blob]);
+  }, [blob, durationHint]);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
@@ -72,10 +70,13 @@ export function AudioPlayer({ blob, onClear }: AudioPlayerProps) {
   }, []);
 
   const formatTime = (s: number) => {
+    if (!Number.isFinite(s) || s < 0) return "0:00";
     const m = Math.floor(s / 60);
     const sec = Math.floor(s % 60);
     return `${m}:${sec.toString().padStart(2, "0")}`;
   };
+
+  const maxDuration = Number.isFinite(duration) && duration > 0 ? duration : DEFAULT_MAX_DURATION;
 
   if (!blob) return null;
 
@@ -91,9 +92,9 @@ export function AudioPlayer({ blob, onClear }: AudioPlayerProps) {
       </Button>
 
       <Slider
-        value={[currentTime]}
+        value={[Math.min(currentTime, maxDuration)]}
         min={0}
-        max={duration || DEFAULT_MAX_DURATION}
+        max={maxDuration}
         step={0.1}
         onValueChange={seek}
         className="flex-1"
