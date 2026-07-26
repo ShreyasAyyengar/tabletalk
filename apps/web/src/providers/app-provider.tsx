@@ -1,4 +1,3 @@
-import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { ConvexQueryClient } from "@convex-dev/react-query";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { notifyManager, QueryClient } from "@tanstack/react-query";
@@ -7,7 +6,6 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import type { ReactNode } from "react";
 import { env } from "#/env.ts";
-import { authClient } from "#/lib/auth-web-client";
 
 export type AppRouterContext = {
   convexClient: ConvexReactClient;
@@ -55,24 +53,22 @@ export function AppProviders({
 }) {
   return (
     <ConvexProvider client={context.convexClient}>
-      <ConvexBetterAuthProvider client={context.convexClient} authClient={authClient} initialToken={initialToken}>
-        {children}
-        <TanStackDevtools
-          config={{
-            position: "bottom-right",
-          }}
-          plugins={[
-            {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-            {
-              name: "Tanstack Query",
-              render: <ReactQueryDevtoolsPanel />,
-            },
-          ]}
-        />
-      </ConvexBetterAuthProvider>
+      {children}
+      <TanStackDevtools
+        config={{
+          position: "bottom-right",
+        }}
+        plugins={[
+          {
+            name: "Tanstack Router",
+            render: <TanStackRouterDevtoolsPanel />,
+          },
+          {
+            name: "Tanstack Query",
+            render: <ReactQueryDevtoolsPanel />,
+          },
+        ]}
+      />
     </ConvexProvider>
   );
 }
