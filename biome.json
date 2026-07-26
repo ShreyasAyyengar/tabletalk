@@ -1,0 +1,108 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/tanstack"
+  ],
+  "files": {
+    "includes": ["**/*", "!packages/ui"]
+  },
+  "javascript": {
+    "formatter": {
+      "lineWidth": 145
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedAttributes": "off",
+        "useSortedKeys": "off"
+      }
+    }
+  },
+  "json": {
+    "parser": {
+      "allowComments": true
+    }
+  },
+  "linter": {
+    "rules": {
+      "security": {
+        "noDangerouslySetInnerHtml": "warn"
+      },
+      "a11y": {
+        "noNoninteractiveElementInteractions": "off",
+        "noStaticElementInteractions": "off"
+      },
+      "correctness": {
+        "noUnusedFunctionParameters": "warn",
+        "noUnusedLabels": "warn",
+        "noUnusedPrivateClassMembers": "warn",
+        "noUnusedVariables": "warn",
+        "useExhaustiveDependencies": "warn"
+      },
+      "style": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "patterns": [
+              {
+                "group": ["**/_generated/server"],
+                "importNamePattern": "(query|mutation|action|internalQuery|internalMutation|internalAction|zQuery|zMutation|zAction)",
+                "message": "SECURITY: Use procedure wrappers from convex/lib/procedures instead of importing Convex builders directly from _generated/server."
+              }
+            ]
+          }
+        },
+        "useBlockStatements": "off",
+        "noMagicNumbers": "warn",
+        "noUselessElse": "warn",
+        "noNegationElse": "off",
+        "useConsistentTypeDefinitions": {
+          "options": {
+            "style": "type"
+          },
+          "level": "warn"
+        },
+        "noNestedTernary": "off",
+        "useConsistentArrowReturn": "warn",
+        "useImportType": "warn",
+        "useErrorCause": "off"
+      },
+      "suspicious": {
+        "useAwait": "warn",
+        "noConsole": "warn"
+      },
+      "complexity": {
+        "useSimplifiedLogicExpression": "off",
+        "useOptionalChain": "warn",
+        "noExcessiveCognitiveComplexity": {
+          "options": {
+            "maxAllowedComplexity": 20
+          },
+          "level": "warn"
+        },
+        "noForEach": "off"
+      },
+      "performance": {
+        "noBarrelFile": "warn"
+      },
+      "nursery": {
+        "useSortedClasses": "warn"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["apps/backend/convex/**"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noAwaitInLoops": "off"
+          }
+        }
+      }
+    }
+  ]
+}

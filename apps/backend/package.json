@@ -1,0 +1,18 @@
+{
+  "name": "@tabletalk/backend",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "convex dev",
+    "env": "bunx convex env set --from-file .env.local --force && bunx convex env list",
+    "generate-auth-schema": "cd convex/betterAuth && bunx auth generate"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "dependencies": {
+    "convex": "^1.42.1",
+    "uuid": "^14.0.1"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "tabletalk",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:minimal": "turbo run dev --filter=!@tabletalk/mobile --filter=!@tabletalk/desktop",
+    "check-types": "turbo run check-types",
+    "lint": "biome check ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.5",
+    "turbo": "^2.10.7",
+    "ultracite": "^7.9.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.13.11",
+    "@types/bun": "^1.3.14",
+    "convex": "^1.42.3",
+    "convex-helpers": "^0.1.120",
+    "typescript": "^7.0.2",
+    "zod": "^4.4.3"
+  },
+  "packageManager": "bun@1.3.14"
+}
