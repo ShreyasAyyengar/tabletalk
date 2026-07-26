@@ -8,8 +8,10 @@
  * @module
  */
 
+import type * as audio_process from "../audio/process.js";
 import type * as danger from "../danger.js";
 import type * as http from "../http.js";
+import type * as lib_gemma from "../lib/gemma.js";
 import type * as lib_procedures from "../lib/procedures.js";
 
 import type {
@@ -19,8 +21,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "audio/process": typeof audio_process;
   danger: typeof danger;
   http: typeof http;
+  "lib/gemma": typeof lib_gemma;
   "lib/procedures": typeof lib_procedures;
 }>;
 
