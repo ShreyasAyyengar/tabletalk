@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+import { Bubble, BubbleContent } from "@tabletalk/shad-ui/components/bubble";
 
 import { Message, MessageContent } from "@tabletalk/shad-ui/components/message";
-import { Bubble, BubbleContent } from "@tabletalk/shad-ui/components/bubble";
+import { useEffect, useRef } from "react";
 
 import { AudioPlayer } from "./audio-player";
 
@@ -28,9 +28,7 @@ export function ChatMessages({ messages }: { messages: ChatMessage[] }) {
             <Bubble variant={msg.role === "user" ? "default" : "secondary"}>
               <BubbleContent>
                 {msg.text ? <p>{msg.text}</p> : null}
-                {msg.audioBlob ? (
-                  <AudioPlayer blob={msg.audioBlob} durationHint={msg.durationHint} />
-                ) : null}
+                {msg.audioBlob ? <AudioPlayer blob={msg.audioBlob} durationHint={msg.durationHint} /> : null}
               </BubbleContent>
             </Bubble>
           </MessageContent>

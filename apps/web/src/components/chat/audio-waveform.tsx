@@ -55,6 +55,9 @@ export function AudioWaveform({ blob, currentTime, duration, onSeek }: AudioWave
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const primaryColor = "hsl(0 0% 100%)";
+    const mutedColor = "hsl(0 0% 100% / 0.25)";
+
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;
@@ -76,10 +79,7 @@ export function AudioWaveform({ blob, currentTime, duration, onSeek }: AudioWave
       const x = i * (barWidth + BAR_GAP);
       const y = (h - barHeight) / 2;
 
-      ctx.fillStyle =
-        i < playedBars
-          ? "hsl(var(--primary))"
-          : "hsl(var(--muted-foreground) / 0.3)";
+      ctx.fillStyle = i < playedBars ? primaryColor : mutedColor;
 
       ctx.beginPath();
       ctx.roundRect(x, y, barWidth, barHeight, 2);
@@ -96,14 +96,8 @@ export function AudioWaveform({ blob, currentTime, duration, onSeek }: AudioWave
       const ratio = Math.max(0, Math.min(1, x / rect.width));
       onSeek(ratio * duration);
     },
-    [duration, onSeek],
+    [duration, onSeek]
   );
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="h-10 w-full cursor-pointer"
-      onClick={handleClick}
-    />
-  );
+  return <canvas ref={canvasRef} className="h-10 w-full cursor-pointer" onClick={handleClick} />;
 }
