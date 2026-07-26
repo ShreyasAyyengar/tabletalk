@@ -2,9 +2,8 @@ import { Pause, Play, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@tabletalk/shad-ui/components/button";
-import { Slider } from "@tabletalk/shad-ui/components/slider";
 
-const DEFAULT_MAX_DURATION = 100;
+import { AudioWaveform } from "./audio-waveform";
 
 export function AudioPlayer({ blob, durationHint, onClear }: { blob: Blob | null; durationHint?: number; onClear?: () => void }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -62,11 +61,11 @@ export function AudioPlayer({ blob, durationHint, onClear }: { blob: Blob | null
     }
   }, [playing]);
 
-  const seek = useCallback((value: number[]) => {
+  const seekTo = useCallback((t: number) => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.currentTime = value[0];
-    setCurrentTime(value[0]);
+    audio.currentTime = t;
+    setCurrentTime(t);
   }, []);
 
   const formatTime = (s: number) => {
@@ -75,8 +74,6 @@ export function AudioPlayer({ blob, durationHint, onClear }: { blob: Blob | null
     const sec = Math.floor(s % 60);
     return `${m}:${sec.toString().padStart(2, "0")}`;
   };
-
-  const maxDuration = Number.isFinite(duration) && duration > 0 ? duration : DEFAULT_MAX_DURATION;
 
   if (!blob) return null;
 
@@ -91,16 +88,16 @@ export function AudioPlayer({ blob, durationHint, onClear }: { blob: Blob | null
         {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
       </Button>
 
-      <Slider
-        value={[Math.min(currentTime, maxDuration)]}
-        min={0}
-        max={maxDuration}
-        step={0.1}
-        onValueChange={seek}
-        className="flex-1"
-      />
+      <div className="min-w-0 flex-1">
+        <AudioWaveform
+          blob={blob}
+          currentTime={currentTime}
+          duration={duration}
+          onSeek={seekTo}
+        />
+      </div>
 
-      <span className="min-w-12 text-right text-muted-foreground text-xs tabular-nums">
+      <span className="min-w-12 shrink-0 text-right text-muted-foreground text-xs tabular-nums">
         {formatTime(currentTime)} / {formatTime(duration)}
       </span>
 
