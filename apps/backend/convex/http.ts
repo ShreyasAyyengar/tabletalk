@@ -1,10 +1,12 @@
 import { httpRouter } from "convex/server";
+import { receiveAudio } from "./audio/process.ts";
 
 const http = httpRouter();
-// http.route({
-//   path: "/oauth/google/calendar/callback",
-//   method: "GET",
-//   handler: googleCalendarCallback,
-// });
+
+http.route({
+  path: "/sendImage",
+  method: "POST",
+  handler: receiveAudio,
+});
 
 export default http;
