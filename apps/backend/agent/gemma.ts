@@ -2,7 +2,6 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 import { config } from "dotenv";
 config({ path: ".env.local" });
-console.log("CONVEX_URL:", process.env.CONVEX_URL);
 
 const convex = new ConvexHttpClient(process.env.CONVEX_URL!);
 
@@ -42,23 +41,22 @@ const tools = [
   },
 ];
 
-
 const toolImpls: Record<string, (args: any) => Promise<any>> = {
   check_availability: async (args) => await convex.query(api.reservations.checkAvailability, args),
   create_reservation: async (args) => await convex.mutation(api.reservations.createReservation, args),
 };
 
-export async function runAgent(userMessage: string) {
+export async function runAgent(userMessage: string): Promise<string> {
+  const today = new Date().toISOString().split("T")[0];
+
   const messages: any[] = [
     {
       role: "system",
-      content:
-        "You are a restaurant host. Use the tools to check availability and book reservations. Confirm details before booking.",
+      content: `You are a restaurant host. Today is ${today}. Use the tools to check availability and book reservations. Confirm details before booking.`,
     },
     { role: "user", content: userMessage },
   ];
 
-  // Loop until the model stops asking for tools
   for (let step = 0; step < 5; step++) {
     const res = await fetch("http://localhost:11434/v1/chat/completions", {
       method: "POST",
@@ -67,15 +65,12 @@ export async function runAgent(userMessage: string) {
     });
     const data = await res.json() as any;
     const msg = data.choices[0].message;
-    console.log("STEP", step, "tool_calls:", msg.tool_calls);
     messages.push(msg);
 
-    // No tool calls? The model is done — return its text.
     if (!msg.tool_calls || msg.tool_calls.length === 0) {
-      return msg.content;
+      return msg.content ?? "";
     }
 
-    // Run each requested tool and feed results back
     for (const call of msg.tool_calls) {
       const args = JSON.parse(call.function.arguments);
       const impl = toolImpls[call.function.name];
@@ -91,7 +86,3 @@ export async function runAgent(userMessage: string) {
 
   return "Sorry, I couldn't complete that.";
 }
-
-runAgent("Can I get a table for 4 this Friday at 7pm, somewhere by the window?")
-  .then((result) => console.log("RESULT:", result))
-  .catch((err) => console.error("ERROR:", err));
