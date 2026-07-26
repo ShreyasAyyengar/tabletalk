@@ -66,7 +66,7 @@ export function AudioWaveform({ blob, currentTime, duration, onSeek }: AudioWave
 
     const w = rect.width;
     const h = rect.height;
-    const barWidth = Math.max((w - BAR_GAP * (BAR_COUNT - 1)) / BAR_COUNT, 2);
+    const barWidth = (w - BAR_GAP * (BAR_COUNT - 1)) / BAR_COUNT;
 
     ctx.clearRect(0, 0, w, h);
 
