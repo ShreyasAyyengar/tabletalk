@@ -1,10 +1,22 @@
+import { useCallback, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { AudioPlayer } from "#/components/chat/audio-player";
 import { VoiceRecorder } from "#/components/chat/voice-recorder";
 
 export const Route = createFileRoute("/")({ component: App });
 
 function App() {
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+
+  const handleRecordingComplete = useCallback((blob: Blob) => {
+    setAudioBlob(blob);
+  }, []);
+
+  const handleClear = useCallback(() => {
+    setAudioBlob(null);
+  }, []);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-16 bg-background px-4">
       <section className="flex flex-col items-center gap-3">
@@ -16,11 +28,10 @@ function App() {
         </p>
       </section>
 
-      <VoiceRecorder
-        onRecordingComplete={(blob) => {
-          console.log("Recorded blob:", blob.type, `${(blob.size / 1024).toFixed(1)} KB`)
-        }}
-      />
+      <div className="flex flex-col items-center gap-4">
+        <VoiceRecorder onRecordingComplete={handleRecordingComplete} />
+        <AudioPlayer blob={audioBlob} onClear={handleClear} />
+      </div>
     </main>
   );
 }
