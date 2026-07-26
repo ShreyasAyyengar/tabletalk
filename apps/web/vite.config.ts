@@ -18,7 +18,7 @@ const config = defineConfig({
     viteReact(),
   ],
   ssr: {
-    noExternal: ["@convex-dev/better-auth", "@convex-dev/react-query", "convex"],
+    noExternal: ["@convex-dev/react-query", "convex"],
   },
 });
 
