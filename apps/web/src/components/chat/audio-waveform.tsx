@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const BAR_COUNT = 48;
-const BAR_GAP = 2;
+const AMP_BINS = 100;
+const BAR_GAP = 1;
+const TARGET_BAR_WIDTH = 3;
 const MIN_BAR_HEIGHT = 2;
+const MIN_DISPLAY_BARS = 4;
 const FALLBACK_AMP = 0.3;
 const AMP_HEIGHT_RATIO = 0.9;
 
@@ -27,9 +29,9 @@ export function AudioWaveform({ blob, currentTime, duration, onSeek }: AudioWave
       .then((buffer) => {
         if (cancelled) return;
         const data = buffer.getChannelData(0);
-        const binSize = Math.floor(data.length / BAR_COUNT);
+        const binSize = Math.floor(data.length / AMP_BINS);
         const amps: number[] = [];
-        for (let i = 0; i < BAR_COUNT; i += 1) {
+        for (let i = 0; i < AMP_BINS; i += 1) {
           let peak = 0;
           for (let j = 0; j < binSize; j += 1) {
             const abs = Math.abs(data[i * binSize + j]);
@@ -40,7 +42,7 @@ export function AudioWaveform({ blob, currentTime, duration, onSeek }: AudioWave
         setAmplitudes(amps);
       })
       .catch(() => {
-        if (!cancelled) setAmplitudes(Array.from({ length: BAR_COUNT }, () => FALLBACK_AMP));
+        if (!cancelled) setAmplitudes(Array.from({ length: AMP_BINS }, () => FALLBACK_AMP));
       });
 
     return () => {
@@ -64,20 +66,27 @@ export function AudioWaveform({ blob, currentTime, duration, onSeek }: AudioWave
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
 
-    const w = rect.width;
-    const h = rect.height;
-    const barWidth = (w - BAR_GAP * (BAR_COUNT - 1)) / BAR_COUNT;
+    ctx.clearRect(0, 0, rect.width, rect.height);
 
-    ctx.clearRect(0, 0, w, h);
+    const displayCount = Math.max(MIN_DISPLAY_BARS, Math.floor((rect.width + BAR_GAP) / (TARGET_BAR_WIDTH + BAR_GAP)));
+    const merge = Math.floor(AMP_BINS / displayCount);
+    const barWidth = (rect.width - BAR_GAP * (displayCount - 1)) / displayCount;
 
     const progress = duration > 0 ? currentTime / duration : 0;
-    const playedBars = Math.floor(progress * BAR_COUNT);
+    const playedBars = Math.floor(progress * displayCount);
 
-    for (let i = 0; i < BAR_COUNT; i += 1) {
-      const amp = amplitudes[i] ?? FALLBACK_AMP;
-      const barHeight = Math.max(amp * h * AMP_HEIGHT_RATIO, MIN_BAR_HEIGHT);
+    for (let i = 0; i < displayCount; i += 1) {
+      let peak = 0;
+      for (let j = 0; j < merge; j += 1) {
+        const idx = i * merge + j;
+        if (idx < amplitudes.length) {
+          const v = amplitudes[idx] ?? FALLBACK_AMP;
+          if (v > peak) peak = v;
+        }
+      }
+      const barHeight = Math.max(peak * rect.height * AMP_HEIGHT_RATIO, MIN_BAR_HEIGHT);
       const x = i * (barWidth + BAR_GAP);
-      const y = (h - barHeight) / 2;
+      const y = (rect.height - barHeight) / 2;
 
       ctx.fillStyle = i < playedBars ? primaryColor : mutedColor;
 
